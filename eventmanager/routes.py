@@ -35,6 +35,7 @@ def event_detail(event_id):
 def add_event():
     categories = Category.query.all()  # Fetch all categories
     if request.method == "POST":
+        # Expecting 'dd-mm-yyyy HH:MM' format from the form input
         event_date_raw = datetime.strptime(request.form.get("date"), "%d-%m-%Y %H:%M")
         
         # Determine if the event should be marked as featured
@@ -67,7 +68,8 @@ def edit_event(event_id):
     event = Event.query.get_or_404(event_id)
     categories = Category.query.all()  # Fetch categories for the dropdown
     if request.method == "POST":
-        event_date_raw = datetime.strptime(request.form.get("date"), "%d-%m-%Y %H:%M")
+        # Expecting 'dd-mm-yyyy HH:MM' format from the form input
+        event_date_raw = datetime.strptime(request.form.get("date"), "%Y-%m-%dT%H:%M")
         
         # Update the featured status
         event.featured = request.form.get("featured") == "1"  # Check if the checkbox was checked
@@ -88,7 +90,7 @@ def edit_event(event_id):
         db.session.commit()
         return redirect(url_for("home"))
     
-    # Format the date for rendering in the form as 'dd-mm-yyyyTHH:MM'
+    # Format the date for rendering in the form as 'dd-mm-yyyy HH:MM'
     formatted_date = event.date.strftime('%d-%m-%Y %H:%M')
     return render_template("edit_event.html", event=event, categories=categories, formatted_date=formatted_date)
 
