@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Add New Event{% endblock %}
+
+{% block content %}
+    <h3 class="center-align lime-text text-darken-4">Add New Event</h3>
+
+    <form method="POST" action="{{ url_for('add_event') }}" class="row" enctype="multipart/form-data">
+        <!-- Event Title -->
+        <div class="input-field col s12">
+            <input type="text" name="title" id="title" required>
+            <label for="title">Event Title</label>
+        </div>
+
+        <!-- Event Description -->
+        <div class="input-field col s12">
+            <textarea name="description" id="description" class="materialize-textarea" required></textarea>
+            <label for="description">Event Description</label>
+        </div>
+
+        <!-- Event Date and Time -->
+        <div class="input-field col s12">
+            <input type="datetime-local" name="date" id="date" required>
+            <label for="date" class="active">Event Date and Time</label>
+        </div>
+
+        <!-- Event Location -->
+        <div class="input-field col s12">
+            <input type="text" name="location" id="location" required>
+            <label for="location">Event Location</label>
+        </div>
+
+        <!-- Event Category Dropdown -->
+        <div class="input-field col s12">
+            <select name="category_id" required>
+                <option value="" disabled selected>Choose Category</option>
+                {% for category in categories %}
+                    <option value="{{ category.id }}">{{ category.name }}</option>
+                {% endfor %}
+            </select>
+            <label for="category_id">Event Category</label>
+        </div>
+
+        <!-- Featured Checkbox -->
+        <div class="input-field col s12">
+            <label>
+                <input type="checkbox" name="featured" value="1" />
+                <span>Mark as Featured</span>
+            </label>
+        </div>
+
+        <!-- Event Image Upload -->
+        <div class="input-field col s12">
+            <input type="file" name="image" id="image" accept="image/*">
+            <label for="image">Upload Event Image (optional)</label>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="row">
+            <div class="col s12 center-align">
+                <button type="submit" class="btn-large lime darken-4">
+                    Add Event <i class="fas fa-plus-square right"></i>
+                </button>
+            </div>
+        </div>
+    </form>
+{% endblock %}
