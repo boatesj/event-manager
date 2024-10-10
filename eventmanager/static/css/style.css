@@ -111,3 +111,25 @@ nav ul li a:hover {
 .nav-link-custom:hover {
     background-color: #afb42b; /* Darker teal for hover effect */
 }
+
+.input-field {
+    margin-bottom: 30px; /* Adjust spacing between input fields */
+}
+
+.input-field label {
+    margin-bottom: 5px; /* Space between label and input */
+}
+
+.center-align {
+    margin-top: 20px; /* Space for center-align elements */
+}
+
+/* Additional styles for the featured checkbox */
+.input-field input[type="checkbox"] {
+    margin-top: 20px; /* Space between checkbox and label */
+}
+
+.sparks {
+    margin-bottom: 20px;
+}
+

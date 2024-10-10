@@ -17,7 +17,8 @@ class Event(db.Model):
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=True)
 
     # New field for storing the image filename
-    image_file = db.Column(db.String(120), nullable=True)
-    
+    image_file = db.Column(db.String(120), nullable=True)  # Ensure this line is included
+
+     
     def __repr__(self):
         return f"<Event {self.title} - {self.date}>"

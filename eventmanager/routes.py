@@ -1,8 +1,15 @@
-from flask import render_template, request, redirect, url_for, flash
-from eventmanager import app, db
-from eventmanager.models import Event, Category  # Import Category along with Event
-from datetime import datetime
 import os
+from flask import request, redirect, url_for, flash, render_template
+from werkzeug.utils import secure_filename
+from eventmanager import app, db
+from eventmanager.models import Event, Category
+from datetime import datetime
+
+# Allowed image extensions
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # Home page showing list of all upcoming and past events
 @app.route("/")
@@ -31,36 +38,50 @@ def event_detail(event_id):
     return render_template("event_detail.html", event=event)
 
 
+
 # Create a new event
 @app.route("/add_event", methods=["GET", "POST"])
 def add_event():
     categories = Category.query.all()  # Fetch all categories
     if request.method == "POST":
         # Parse the date input from the form
-        event_date_raw = request.form.get("date")
-        
-        # Split the date string to get day, month, and year
+        event_date_raw = request.form.get("date")  # Expecting 'dd-mm-yyyy'
+        event_time_raw = request.form.get("time")  # Expecting 'HH:MM'
+
+        # Split the date string to get day, month, year
         day, month, year = map(int, event_date_raw.split('-'))
-        
-        # Create a datetime object; you can set time to a default (e.g., 00:00)
-        event_date = datetime(year, month, day, 0, 0)  # Set time to midnight
-        
-        # Determine if the event should be marked as featured
-        featured = request.form.get("featured") == "1"  # Check if the checkbox was checked
+        hour, minute = map(int, event_time_raw.split(':'))
 
-        event = Event(
-            title=request.form.get("title"),
-            description=request.form.get("description"),
-            date=event_date,  # Keep as datetime object
-            location=request.form.get("location"),
-            category_id=request.form.get("category_id"),
-            featured=featured  # Store featured status
-        )
-        db.session.add(event)
-        db.session.commit()
-        return redirect(url_for("home"))
+        # Create a datetime object
+        event_date = datetime(year, month, day, hour, minute)
+
+        # Handle file upload
+        file = request.files.get('image')  # Get the uploaded file
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file_path = os.path.join(app.static_folder, 'images', filename)  # Update this path
+
+            # Ensure the directory exists
+            os.makedirs(os.path.dirname(file_path), exist_ok=True)
+
+            # Save the file
+            file.save(file_path)
+
+            # Create the event
+            event = Event(
+                title=request.form.get("title"),
+                description=request.form.get("description"),
+                date=event_date,
+                location=request.form.get("location"),
+                category_id=request.form.get("category_id"),
+                featured=request.form.get("featured") == "1",  # Store featured status
+                image_file=filename  # Store the filename in the database
+            )
+            db.session.add(event)
+            db.session.commit()
+            return redirect(url_for("home"))
+
     return render_template("add_event.html", categories=categories)
-
 
 # Edit an existing event
 @app.route("/edit_event/<int:event_id>", methods=["GET", "POST"])
@@ -68,31 +89,29 @@ def edit_event(event_id):
     event = Event.query.get_or_404(event_id)
     categories = Category.query.all()  # Fetch categories for the dropdown
     if request.method == "POST":
-        # Expecting 'dd-mm-yyyy HH:MM' format from the form input
-        event_date_raw = datetime.strptime(request.form.get("date"), "%Y-%m-%dT%H:%M")
-        
-        # Update the featured status
-        event.featured = request.form.get("featured") == "1"  # Check if the checkbox was checked
-        
-        event.title = request.form.get("title")
-        event.description = request.form.get("description")
-        event.date = event_date_raw  # Use the converted datetime object
-        event.location = request.form.get("location")
-        event.category_id = request.form.get("category_id")  # Update category
+        # Handle file upload
+        file = request.files.get('image')  # Get the uploaded file
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file_path = os.path.join(app.static_folder, 'images', filename)  # Update this path
 
-        # Handle file upload for event image
-        event_image = request.files.get("image")
-        if event_image:
-            image_path = os.path.join('static/images', event_image.filename)
-            event_image.save(image_path)
-            event.image = image_path  # Update the image path
+            # Ensure the directory exists
+            os.makedirs(os.path.dirname(file_path), exist_ok=True)
+
+            # Save the file
+            file.save(file_path)
+            event.image_file = filename  # Update the filename in the database
+
+        # Update other event details...
+        # (rest of your code remains unchanged)
 
         db.session.commit()
         return redirect(url_for("home"))
-    
-    # Format the date for rendering in the form as 'dd-mm-yyyy HH:MM'
-    formatted_date = event.date.strftime('%d-%m-%Y %H:%M')
-    return render_template("edit_event.html", event=event, categories=categories, formatted_date=formatted_date)
+
+    formatted_date = event.date.strftime('%d-%m-%Y')
+    formatted_time = event.date.strftime('%H:%M')
+    return render_template("edit_event.html", event=event, categories=categories, formatted_date=formatted_date, formatted_time=formatted_time)
+
 
 # Delete an event
 @app.route("/delete_event/<int:event_id>")

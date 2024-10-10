@@ -1,4 +1,4 @@
-{% extends "base.html" %} 
+{% extends "base.html" %}
 
 {% block title %}Edit Event{% endblock %}
 
@@ -6,34 +6,64 @@
     <h3 class="center-align lime-text text-darken-4">Edit Event</h3>
 
     <form method="POST" action="{{ url_for('edit_event', event_id=event.id) }}" class="row" enctype="multipart/form-data">
-        <div class="input-field col s12">
-            <input type="text" name="title" id="title" value="{{ event.title }}" required>
-            <label for="title" class="active">Event Title</label>
+        
+        <!-- Event Title -->
+        <div class="row">
+            <div class="input-field col s12">
+                <i class="fa fa-pencil-alt prefix lime-text text-darken-4"></i>
+                <input name="title" id="title" type="text" value="{{ event.title }}" class="validate" required>
+                <label for="title" class="active">Event Title</label>
+            </div>
         </div>
 
-        <div class="input-field col s12">
-            <textarea name="description" id="description" class="materialize-textarea">{{ event.description }}</textarea>
-            <label for="description" class="active">Event Description</label>
+        <!-- Event Description -->
+        <div class="row">
+            <div class="input-field col s12">
+                <i class="fa fa-align-left prefix lime-text text-darken-4"></i>
+                <textarea name="description" id="description" minlength="5" maxlength="200" class="materialize-textarea validate" required>{{ event.description }}</textarea>
+                <label for="description" class="active">Event Description</label>
+            </div>
         </div>
 
-        <div class="input-field col s12">
-            <input type="text" name="date" id="date" class="datepicker" placeholder="dd-mm-yyyy HH:MM" required>
-            <label for="date" class="active">Event Date and Time</label>
+        <!-- Event Date -->
+        <div class="row">
+            <div class="input-field col s12">
+                <i class="fa fa-calendar-alt prefix lime-text text-darken-4"></i>
+                <input id="date" name="date" type="text" value="{{ event.date.strftime('%d-%m-%Y') }}" class="datepicker validate" required>
+                <label for="date" class="active">Event Date</label>
+            </div>
         </div>
 
-        <div class="input-field col s12">
-            <input type="text" name="location" id="location" value="{{ event.location }}" required>
-            <label for="location" class="active">Event Location</label>
+        <!-- Event Time -->
+        <div class="row">
+            <div class="input-field col s12">
+                <i class="fa fa-clock prefix lime-text text-darken-4"></i>
+                <input id="time" name="time" type="text" class="timepicker validate" required>
+                <label for="time" class="active">Event Time</label>
+            </div>
         </div>
 
-        <div class="input-field col s12">
-            <select name="category_id" required>
-                <option value="" disabled selected>Choose Category</option>
-                {% for category in categories %}
-                    <option value="{{ category.id }}" {% if event.category_id == category.id %}selected{% endif %}>{{ category.name }}</option>
-                {% endfor %}
-            </select>
-            <label>Event Category</label>
+        <!-- Event Location -->
+        <div class="row">
+            <div class="input-field col s12">
+                <i class="fa fa-map-marker-alt prefix lime-text text-darken-4"></i>
+                <input type="text" name="location" id="location" value="{{ event.location }}" required>
+                <label for="location" class="active">Event Location</label>
+            </div>
+        </div>
+
+        <!-- Event Category Dropdown -->
+        <div class="row">
+            <div class="input-field col s12">
+                <i class="fa fa-tags prefix lime-text text-darken-4"></i> 
+                <select name="category_id" required>
+                    <option value="" disabled selected>Choose Category</option>
+                    {% for category in categories %}
+                        <option value="{{ category.id }}" {% if event.category_id == category.id %}selected{% endif %}>{{ category.name }}</option>
+                    {% endfor %}
+                </select>
+                <label for="category_id">Event Category</label>
+            </div>
         </div>
 
         <!-- Featured Checkbox -->
@@ -46,8 +76,8 @@
 
         <!-- Event Image Upload -->
         <div class="input-field col s12">
+            <label for="image" style="margin-top: 10px;">Upload Event Image (optional)</label>
             <input type="file" name="image" id="image" accept="image/*">
-            <label for="image">Upload Event Image (optional)</label>
         </div>
 
         <!-- Submit Button -->
