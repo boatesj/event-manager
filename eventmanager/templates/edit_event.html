@@ -17,7 +17,7 @@
         </div>
 
         <div class="input-field col s12">
-            <input type="datetime-local" name="date" id="date" value="{{ formatted_date }}" required>
+            <input type="text" name="date" id="date" class="datepicker" placeholder="dd-mm-yyyy HH:MM" required>
             <label for="date" class="active">Event Date and Time</label>
         </div>
 
@@ -34,7 +34,7 @@
                 {% endfor %}
             </select>
             <label>Event Category</label>
-        </div>      
+        </div>
 
         <!-- Featured Checkbox -->
         <div class="input-field col s12">
@@ -42,7 +42,7 @@
                 <input type="checkbox" name="featured" value="1" {% if event.featured %}checked{% endif %} />
                 <span>Mark as Featured</span>
             </label>
-        </div>     
+        </div>
 
         <!-- Event Image Upload -->
         <div class="input-field col s12">

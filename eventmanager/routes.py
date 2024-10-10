@@ -30,37 +30,37 @@ def event_detail(event_id):
     event = Event.query.get_or_404(event_id)
     return render_template("event_detail.html", event=event)
 
+
 # Create a new event
 @app.route("/add_event", methods=["GET", "POST"])
 def add_event():
     categories = Category.query.all()  # Fetch all categories
     if request.method == "POST":
-        # Expecting 'dd-mm-yyyy HH:MM' format from the form input
-        event_date_raw = datetime.strptime(request.form.get("date"), "%d-%m-%Y %H:%M")
+        # Parse the date input from the form
+        event_date_raw = request.form.get("date")
+        
+        # Split the date string to get day, month, and year
+        day, month, year = map(int, event_date_raw.split('-'))
+        
+        # Create a datetime object; you can set time to a default (e.g., 00:00)
+        event_date = datetime(year, month, day, 0, 0)  # Set time to midnight
         
         # Determine if the event should be marked as featured
         featured = request.form.get("featured") == "1"  # Check if the checkbox was checked
 
-        # Handle file upload for event image
-        event_image = request.files.get("image")
-        image_path = None
-        if event_image:
-            image_path = os.path.join('static/images', event_image.filename)
-            event_image.save(image_path)
-
         event = Event(
             title=request.form.get("title"),
             description=request.form.get("description"),
-            date=event_date_raw,  # Keep as datetime object
+            date=event_date,  # Keep as datetime object
             location=request.form.get("location"),
             category_id=request.form.get("category_id"),
-            featured=featured,  # Store featured status
-            image=image_path  # Save image path to the database
+            featured=featured  # Store featured status
         )
         db.session.add(event)
         db.session.commit()
         return redirect(url_for("home"))
     return render_template("add_event.html", categories=categories)
+
 
 # Edit an existing event
 @app.route("/edit_event/<int:event_id>", methods=["GET", "POST"])

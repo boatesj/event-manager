@@ -3,12 +3,20 @@ document.addEventListener('DOMContentLoaded', function() {
     let sidenav = document.querySelectorAll('.sidenav');
     M.Sidenav.init(sidenav);
 
-    // datepicker initialization
-    let datepicker = document.querySelectorAll('.datepicker');
-    M.Datepicker.init(datepicker, {
-        format: "yyyy-mm-dd", // Set format to match database-friendly format
-        i18n: { done: "Select" }
+   
+    // Initialize select elements and datepicker
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize select elements
+    var elems = document.querySelectorAll('select');
+    var instances = M.FormSelect.init(elems);
+
+    // Initialize datepicker
+    var dateElems = document.querySelectorAll('.datepicker');
+    var dateInstances = M.Datepicker.init(dateElems, {
+        format: 'dd-mm-yyyy',  // Set your desired format
     });
+});
+
 
     // select initialization
     let selects = document.querySelectorAll('select');

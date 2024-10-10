@@ -6,17 +6,25 @@
     <h3 class="center-align lime-text text-darken-4">{{ event.title }}</h3>
     
     <!-- Display the event image if it exists -->
-    {% if event.image %}
+    {% if event.image_file %}
         <div class="center-align">
-            <img src="{{ url_for('static', filename=event.image) }}" alt="{{ event.title }}" class="responsive-img" style="max-height: 300px; max-width: 100%;">
+            <img src="{{ url_for('static', filename=event.image_file) }}" alt="{{ event.title }}" class="responsive-img" style="max-height: 300px; max-width: 100%;">
         </div>
     {% endif %}
     
-    <!-- Updated Date format using the custom filter -->
-    <p><strong>Date:</strong> {{ event.date|dateformat }}</p>
+    <!-- Display the formatted event date -->
+    <div class="row">
+        <div class="col s12">
+            <p><strong>Date:</strong> <span class="lime-text">{{ event.date.strftime('%d %B, %Y') }}</span></p>
+        </div>
+    </div>
     
-    <p><strong>Location:</strong> {{ event.location }}</p>
-    <p><strong>Description:</strong> {{ event.description }}</p>
+    <div class="row">
+        <div class="col s12">
+            <p><strong>Location:</strong> {{ event.location }}</p>
+            <p><strong>Description:</strong> {{ event.description }}</p>
+        </div>
+    </div>
 
     <div class="center-align">
         <!-- Edit Event button -->
