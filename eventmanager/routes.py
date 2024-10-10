@@ -4,12 +4,15 @@ from werkzeug.utils import secure_filename
 from eventmanager import app, db
 from eventmanager.models import Event, Category
 from datetime import datetime
+from eventmanager.models import RSVP  # Import the RSVP model
+
 
 # Allowed image extensions
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 # Home page showing list of all upcoming and past events
 @app.route("/")
@@ -30,6 +33,7 @@ def home():
             past_events = Event.query.filter(Event.date < now).order_by(Event.date.desc()).all()
 
     return render_template("events.html", upcoming_events=upcoming_events, past_events=past_events, featured_events=featured_events)
+
 
 # Event detail page
 @app.route("/event/<int:event_id>")
@@ -88,6 +92,7 @@ def add_event():
 def edit_event(event_id):
     event = Event.query.get_or_404(event_id)
     categories = Category.query.all()  # Fetch categories for the dropdown
+    
     if request.method == "POST":
         # Handle file upload
         file = request.files.get('image')  # Get the uploaded file
@@ -102,12 +107,30 @@ def edit_event(event_id):
             file.save(file_path)
             event.image_file = filename  # Update the filename in the database
 
-        # Update other event details...
-        # (rest of your code remains unchanged)
+        # Get the other event details from the form
+        event.title = request.form.get("title")  # Update title
+        event.description = request.form.get("description")  # Update description
+        
+        # Parse the date and time
+        event_date_raw = request.form.get("date")  # Expecting 'dd-mm-yyyy'
+        event_time_raw = request.form.get("time")  # Expecting 'HH:MM'
 
+        # Split the date string to get day, month, year
+        day, month, year = map(int, event_date_raw.split('-'))
+        hour, minute = map(int, event_time_raw.split(':'))
+
+        # Create a datetime object and update event date
+        event.date = datetime(year, month, day, hour, minute)
+
+        event.location = request.form.get("location")  # Update location
+        event.category_id = request.form.get("category_id")  # Update category
+        event.featured = request.form.get("featured") == "1"  # Update featured status
+        
+        # Commit changes to the database
         db.session.commit()
         return redirect(url_for("home"))
 
+    # Format the date and time for the form
     formatted_date = event.date.strftime('%d-%m-%Y')
     formatted_time = event.date.strftime('%H:%M')
     return render_template("edit_event.html", event=event, categories=categories, formatted_date=formatted_date, formatted_time=formatted_time)
@@ -171,3 +194,22 @@ def search():
         return render_template("events.html", upcoming_events=upcoming_events, past_events=past_events)
 
     return redirect(url_for("home"))
+
+
+# Create a new RSVP
+@app.route("/rsvp/<int:event_id>", methods=["POST"])
+def rsvp(event_id):
+    event = Event.query.get_or_404(event_id)
+    
+    # Get form data
+    name = request.form.get("name")
+    email = request.form.get("email")
+    attending = request.form.get("attending") == "1"  # Check if the user is attending
+
+    # Create an RSVP instance
+    rsvp_entry = RSVP(event_id=event.id, name=name, email=email, attending=attending)
+    db.session.add(rsvp_entry)
+    db.session.commit()
+
+    flash('Thank you for your RSVP!', 'success')
+    return redirect(url_for('event_detail', event_id=event.id))

@@ -22,3 +22,19 @@ class Event(db.Model):
      
     def __repr__(self):
         return f"<Event {self.title} - {self.date}>"
+
+        from eventmanager import db
+
+# Schema for the RSVP model
+class RSVP(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    event_id = db.Column(db.Integer, db.ForeignKey('event.id'), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(100), nullable=False)
+    attending = db.Column(db.Boolean, default=False)
+
+    event = db.relationship('Event', backref='rsvps')
+
+    def __repr__(self):
+        return f"<RSVP {self.name} for Event {self.event.title}>"
+
